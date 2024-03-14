@@ -1,14 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
+import 'package:meeting_app/app/navigation/EditMeetingRoomScreen.dart';
+
 
 class RoomCard extends StatefulWidget {
   final DocumentSnapshot meetingRoom;
   final String imageUrl;
+  final void Function() refreshMeetingRooms;
   const RoomCard({
     Key? key,
     required this.meetingRoom,
     required this.imageUrl,
+    required this.refreshMeetingRooms,
   }) : super(key: key);
 
   @override
@@ -173,35 +177,84 @@ class _RoomCardState extends State<RoomCard> {
   }
 
   Widget _buildButtonDelete(String text, Color color, Color textColor) {
-    return FFButtonWidget(
-      onPressed: () {
-        print('');
-      },
-      text: text,
-      options: FFButtonOptions(
-        width: 80,
-        height: 35,
-        color: Color.fromARGB(255, 49, 76, 251),
-        textStyle: FlutterFlowTheme.of(context).bodyLarge.override(
-              fontFamily: 'Readex Pro',
-              color: textColor,
-              fontSize: 16,
-              fontWeight: FontWeight.w500,
-            ),
-        elevation: 0,
-        borderSide: BorderSide(
-          color: Colors.transparent,
-          width: 1,
-        ),
-        borderRadius: BorderRadius.circular(8),
+  return FFButtonWidget(
+    onPressed: () {
+      _showDeleteConfirmationDialog();
+    },
+    text: text,
+    options: FFButtonOptions(
+      width: 80,
+      height: 35,
+      color: color,
+      textStyle: TextStyle(
+        color: textColor,
+        fontSize: 16,
+        fontWeight: FontWeight.w500,
       ),
-    );
+      elevation: 0,
+      borderSide: BorderSide(
+        color: Colors.transparent,
+        width: 1,
+      ),
+      borderRadius: BorderRadius.circular(8),
+    ),
+  );
+}
+void _showDeleteConfirmationDialog() {
+  showDialog(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: Text("Confirm Delete"),
+        content: Text("Are you sure you want to delete this item?"),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Close the dialog
+            },
+            child: Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () {
+              _deleteMeetingRoom(); // Call delete function
+              Navigator.of(context).pop(); // Close the dialog
+            },
+            child: Text("Delete"),
+          ),
+        ],
+      );
+    },
+  );
+}
+void _deleteMeetingRoom() async {
+  try {
+    await FirebaseFirestore.instance
+        .collection('meetingRooms')
+        .doc(widget.meetingRoom.id) // Assuming 'id' is the field representing document ID
+        .delete();
+    // Refresh meeting rooms after deletion
+    widget.refreshMeetingRooms();
+  } catch (e) {
+    print('Error deleting meeting room: $e');
+    // Handle any errors here
   }
+}
+
+void _editMeetingRoom() {
+  Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => EditMeetingRoomScreen(meetingRoom: widget.meetingRoom)),
+  ).then((_) {
+    // Refresh meeting rooms after editing
+    widget.refreshMeetingRooms();
+  });
+}
+
 
   Widget _buildButtonEdit(String text, Color color, Color textColor) {
     return FFButtonWidget(
       onPressed: () {
-        print('');
+        _editMeetingRoom();
       },
       text: text,
       options: FFButtonOptions(
