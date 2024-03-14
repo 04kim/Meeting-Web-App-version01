@@ -81,6 +81,8 @@ class _ManageMeetingroomPageBodyState extends State<ManageMeetingroomPageBody> {
     });
   }
 
+  
+
   @override
   Widget build(BuildContext context) {
     return Stack(
@@ -100,6 +102,7 @@ class _ManageMeetingroomPageBodyState extends State<ManageMeetingroomPageBody> {
                       child: RoomCard(
                         meetingRoom: widget.meetingRooms[i],
                         imageUrl: widget.meetingRooms[i]['imageUrl'],
+                        refreshMeetingRooms: _fetchMeetingRooms,
                       ),
                     ),
                 ],
