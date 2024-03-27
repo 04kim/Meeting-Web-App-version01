@@ -54,6 +54,8 @@ dependencies:
   flutter_time_picker_spinner: ^2.0.0
   image_picker: ^1.0.7
   firebase_storage: ^11.6.9
+  qr_flutter: ^4.1.0
+  email_validator: ^2.1.17
   
   
 

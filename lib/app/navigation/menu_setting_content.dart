@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:meeting_app/app/navigation/manage_meeting_page.dart';
 import 'package:meeting_app/app/navigation/manage_meetingroom_page.dart';
+import 'package:meeting_app/app/navigation/manage_participants_page.dart';
 import 'package:meeting_app/app/navigation/meeting_room_form.dart';
+import 'package:meeting_app/app/navigation/participant_form.dart';
 
 import 'manage_meeting_form1.dart';
 
@@ -37,10 +39,13 @@ class _MenuSettingContentState extends State<MenuSettingContent> {
       content = ManageMeetingForm1(changeMenuContent: widget.changeMenuContent);
     } else if (widget.selectedMenu == 4) {
       // Use widget.selectedMenu
-      content = ManageMeetingPage(changeMenuContent: widget.changeMenuContent);
+      content = ManageParticipants(changeMenuContent: widget.changeMenuContent);
     } else if (widget.selectedMenu == 5) {
       // Use widget.selectedMenu
       content = MeetingRoomForm(changeMenuContent: widget.changeMenuContent);
+    } else if (widget.selectedMenu == 6) {
+      // Use widget.selectedMenu
+      content = ParticipantForm(changeMenuContent: widget.changeMenuContent);
     } else {
       content = Container(); // Default fallback
     }

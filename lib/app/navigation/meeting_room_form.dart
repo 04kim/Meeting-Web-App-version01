@@ -1,9 +1,5 @@
-import 'dart:io';
-
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:image_picker/image_picker.dart';
 
 class MeetingRoomForm extends StatefulWidget {
   final void Function(int p1) changeMenuContent;
@@ -26,20 +22,26 @@ class _MeetingRoomFormState extends State<MeetingRoomForm> {
   String _roomName = '';
   String _roomLevel = '';
   String _roomDescription = '';
-  String imageUrl = '';
+  String? _imageAsset;
 
   Future<void> _handleFormSubmit() async {
     if (_formKey.currentState!.validate()) {
       _formKey.currentState!.save();
 
-      await FirebaseFirestore.instance.collection('meetingRooms').add({
-        'roomName': _roomName,
-        'roomLevel': _roomLevel,
-        'roomDescription': _roomDescription,
-        'imageUrl': imageUrl,
-      });
+      try {
+        // Save the meeting room details to Firestore
+        await _firestore.collection('meetingRooms').add({
+          'roomName': _roomName,
+          'roomLevel': _roomLevel,
+          'roomDescription': _roomDescription,
+          'imageAsset': _imageAsset,
+        });
 
-      widget.changeMenuContent(2); // Refresh the meeting room page
+        // Refresh the meeting room page
+        widget.changeMenuContent(2);
+      } catch (error) {
+        print('Error saving to Firestore: $error');
+      }
     }
   }
 
@@ -47,9 +49,9 @@ class _MeetingRoomFormState extends State<MeetingRoomForm> {
     return GestureDetector(
       onTap: () => _pickImage(),
       child: Container(
-        child: imageUrl.isNotEmpty
-            ? Image.network(
-                imageUrl,
+        child: _imageAsset != null
+            ? Image.asset(
+                _imageAsset!,
                 width: double.infinity,
                 height: 200,
                 fit: BoxFit.cover,
@@ -61,27 +63,16 @@ class _MeetingRoomFormState extends State<MeetingRoomForm> {
   }
 
   void _pickImage() async {
-    ImagePicker imagePicker = ImagePicker();
-    XFile? file = await imagePicker.pickImage(source: ImageSource.gallery);
+    // Open the image picker and set the selected image asset path
+    final pickedImage = await Navigator.push<String>(
+      context,
+      MaterialPageRoute(builder: (context) => ImagePickerScreen()),
+    );
 
-    if (file == null) return;
-
-    setState(() {
-      imageUrl = file.path;
-    });
-
-    String uniqueFileName = DateTime.now().millisecondsSinceEpoch.toString();
-
-    Reference referenceRoot = FirebaseStorage.instance.ref();
-    Reference referenceDirImages = referenceRoot.child('images');
-    Reference referenceImageToUpload = referenceDirImages.child(uniqueFileName);
-
-    try {
-      await referenceImageToUpload.putFile(File(file.path));
-      imageUrl = await referenceImageToUpload.getDownloadURL();
-    } catch (error) {
-      print('Error uploading image: $error');
-      // Handle the error as needed
+    if (pickedImage != null) {
+      setState(() {
+        _imageAsset = pickedImage;
+      });
     }
   }
 
@@ -171,6 +162,56 @@ class _MeetingRoomFormState extends State<MeetingRoomForm> {
           return null;
         },
         onSaved: onSave,
+      ),
+    );
+  }
+}
+
+class ImagePickerScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    // In this example, you can directly return your list of assets here,
+    // or you can dynamically generate a list of assets based on some logic.
+    // For simplicity, let's assume you have a fixed list of assets.
+    List<String> imageAssets = [
+      'assets/image/A01.jpg',
+      'assets/image/A02.jpg',
+      'assets/image/A03.jpg',
+      'assets/image/A04.jpg',
+      'assets/image/A05.jpg',
+      'assets/image/A06.jpg',
+      // Add more asset paths here
+    ];
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Pick an Image'),
+      ),
+      body: SingleChildScrollView(
+        controller: ScrollController(),
+        scrollDirection: Axis.horizontal,
+        child: Row(
+          children: [
+            for (int index = 0; index < imageAssets.length; index++)
+              Padding(
+                padding: EdgeInsets.all(5.0),
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.pop(context, imageAssets[index]);
+                  },
+                  child: Container(
+                    width: 300, // Adjust width as needed
+                    height: 300, // Adjust height as needed
+                    child: Image.asset(
+                      imageAssets[index],
+                      fit: BoxFit
+                          .cover, // Adjust fit to cover or contain as needed
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

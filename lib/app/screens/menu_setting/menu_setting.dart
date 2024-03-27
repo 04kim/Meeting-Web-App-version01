@@ -60,6 +60,13 @@ class _MenuSettingPageState extends State<MenuSettingPage> {
     });
   }
 
+  void _handleforthButtonPressed() {
+    setState(() {
+      selectedMenu = 4;
+      print(selectedMenu);
+    });
+  }
+
   void changeMenuContent(int selectedMenu) {
     setState(() {
       this.selectedMenu = selectedMenu;
@@ -336,6 +343,14 @@ class _MenuSettingPageState extends State<MenuSettingPage> {
                 title: TextButton(
                   onPressed: _handleSecondButtonPressed,
                   child: Text('ຈັດການຫ້ອງປະຊຸມ',
+                      style: TextStyle(color: Colors.white)),
+                ),
+              ),
+              SizedBox(height: 10),
+              ListTile(
+                title: TextButton(
+                  onPressed: _handleforthButtonPressed,
+                  child: Text('ຈັດການຂໍ້ມູນຜູ້ເຂົ້າຮ່ວມ',
                       style: TextStyle(color: Colors.white)),
                 ),
               ),

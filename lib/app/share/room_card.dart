@@ -1,14 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutterflow_ui/flutterflow_ui.dart';
+import 'package:meeting_app/app/share/EditMeetingRoomScreen.dart';
 
 class RoomCard extends StatefulWidget {
   final DocumentSnapshot meetingRoom;
-  final String imageUrl;
+  final String imageAsset;
+  final void Function() refreshMeetingRooms;
   const RoomCard({
     Key? key,
     required this.meetingRoom,
-    required this.imageUrl,
+    required this.imageAsset,
+    required this.refreshMeetingRooms,
   }) : super(key: key);
 
   @override
@@ -85,13 +89,21 @@ class _RoomCardState extends State<RoomCard> {
 
   Widget _buildImage() {
     return Container(
-      child: Image.network(
-        widget.imageUrl,
-        width: double.infinity,
-        height: 200,
-        fit: BoxFit.cover,
-        alignment: Alignment(0, 0),
-      ),
+      child: kIsWeb
+          ? Image.network(
+              widget.imageAsset,
+              width: double.infinity,
+              height: 200,
+              fit: BoxFit.cover,
+              alignment: Alignment(0, 0),
+            )
+          : Image.asset(
+              widget.imageAsset,
+              width: double.infinity,
+              height: 200,
+              fit: BoxFit.cover,
+              alignment: Alignment(0, 0),
+            ),
     );
   }
 
@@ -175,7 +187,7 @@ class _RoomCardState extends State<RoomCard> {
   Widget _buildButtonDelete(String text, Color color, Color textColor) {
     return FFButtonWidget(
       onPressed: () {
-        print('');
+        _showDeleteConfirmationDialog();
       },
       text: text,
       options: FFButtonOptions(
@@ -201,7 +213,7 @@ class _RoomCardState extends State<RoomCard> {
   Widget _buildButtonEdit(String text, Color color, Color textColor) {
     return FFButtonWidget(
       onPressed: () {
-        print('');
+        _editMeetingRoom();
       },
       text: text,
       options: FFButtonOptions(
@@ -271,6 +283,60 @@ class _RoomCardState extends State<RoomCard> {
               onPressed: () {
                 Navigator.of(context).pop();
               },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _deleteMeetingRoom() async {
+    try {
+      await FirebaseFirestore.instance
+          .collection('meetingRooms')
+          .doc(widget.meetingRoom
+              .id) // Assuming 'id' is the field representing document ID
+          .delete();
+      // Refresh meeting rooms after deletion
+      widget.refreshMeetingRooms();
+    } catch (e) {
+      print('Error deleting meeting room: $e');
+      // Handle any errors here
+    }
+  }
+
+  void _editMeetingRoom() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) =>
+              EditMeetingRoomScreen(meetingRoom: widget.meetingRoom)),
+    ).then((_) {
+      // Refresh meeting rooms after editing
+      widget.refreshMeetingRooms();
+    });
+  }
+
+  void _showDeleteConfirmationDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Confirm Delete"),
+          content: Text("Are you sure you want to delete this item?"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text("Cancel"),
+            ),
+            TextButton(
+              onPressed: () {
+                _deleteMeetingRoom(); // Call delete function
+                Navigator.of(context).pop(); // Close the dialog
+              },
+              child: Text("Delete"),
             ),
           ],
         );

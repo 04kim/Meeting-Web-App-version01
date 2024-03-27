@@ -27,9 +27,9 @@ class _ManageMeetingForm1State extends State<ManageMeetingForm1> {
     selectedMenu = 0;
   }
 
-  void _handleForthButtonPressed() {
+  void _handleBackButtonPressed() {
     setState(() {
-      widget.changeMenuContent(4);
+      widget.changeMenuContent(1);
       print(selectedMenu);
     });
   }
@@ -58,7 +58,7 @@ class _ManageMeetingForm1State extends State<ManageMeetingForm1> {
               child: Row(
                 children: [
                   GestureDetector(
-                    child: BackButton(onPressed: _handleForthButtonPressed),
+                    child: BackButton(onPressed: _handleBackButtonPressed),
                   ),
                   Expanded(
                     child: Center(

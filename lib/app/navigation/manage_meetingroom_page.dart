@@ -25,6 +25,7 @@ class ManageMeetingroomPage extends StatelessWidget {
   }
 }
 
+// ignore: must_be_immutable
 class ManageMeetingroomPageBody extends StatefulWidget {
   final void Function(int) changeMenuContent;
   List<DocumentSnapshot> meetingRooms;
@@ -99,7 +100,8 @@ class _ManageMeetingroomPageBodyState extends State<ManageMeetingroomPageBody> {
                       padding: const EdgeInsets.symmetric(horizontal: 8.0),
                       child: RoomCard(
                         meetingRoom: widget.meetingRooms[i],
-                        imageUrl: widget.meetingRooms[i]['imageUrl'],
+                        imageAsset: widget.meetingRooms[i]['imageAsset'],
+                        refreshMeetingRooms: _fetchMeetingRooms,
                       ),
                     ),
                 ],
